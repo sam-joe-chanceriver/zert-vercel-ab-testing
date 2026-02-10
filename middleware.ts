@@ -3,6 +3,14 @@ import { type NextRequest, NextResponse } from "next/server";
 const COOKIE_NAME = "ab-visitor-id";
 const HEADER_NAME = "x-ab-visitor-id";
 
+// -----------------------------------------------------------------------------
+// A/B RANDOMNESS: visitor identity
+// -----------------------------------------------------------------------------
+// New visitors get a random UUID; returning visitors keep the same cookie.
+// That stable id is hashed in flags.ts to pick a variant (same visitor = same
+// variant). To change "randomness", either change how we generate the id here
+// or change the hash/weight in flags.ts.
+// -----------------------------------------------------------------------------
 function getOrGenerateVisitorId(request: NextRequest): {
   visitorId: string;
   isNew: boolean;

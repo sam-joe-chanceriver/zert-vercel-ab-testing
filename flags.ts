@@ -13,10 +13,32 @@ interface Entities {
   visitor?: { id: string };
 }
 
+// =============================================================================
+// A/B RANDOMNESS CONTROL – variant assignment happens here
+// =============================================================================
+// - Visitor ID comes from middleware (cookie `ab-visitor-id` or header
+//   `x-ab-visitor-id`). New visitors get a random UUID (middleware.ts).
+// - hashToIndex(id, N) maps any string to 0..N-1 deterministically (same
+//   visitor always gets the same variant). Change the hash or use
+//   weightedHashToIndex for a biased split (e.g. 70% A, 30% B).
+// =============================================================================
+
+/** Deterministic hash: same visitor id → same index in [0, length). */
 function hashToIndex(id: string, length: number): number {
   let h = 0;
   for (let i = 0; i < id.length; i++) h = (h << 5) - h + id.charCodeAt(i);
   return Math.abs(h) % length;
+}
+
+/**
+ * Weighted split: control the % of visitors who see variant A (rest see B).
+ * @param id - visitor id (or id + salt for per-flag variation)
+ * @param weightA - probability of variant A in [0, 1], e.g. 0.7 for 70% A
+ * @returns 0 for A, 1 for B
+ */
+function weightedHashToIndex(id: string, weightA: number): 0 | 1 {
+  const h = hashToIndex(id, 100) / 99; // 0..1
+  return h < weightA ? 0 : 1;
 }
 
 const identify = dedupe(
@@ -45,6 +67,8 @@ export const homePageVariant = flag<HomePageVariant, Entities>({
   decide({ entities }) {
     const id = entities?.visitor?.id ?? "anonymous";
     const opts = HOME_PAGE_FLAG_DEFINITION.options;
+    // 50/50 split: use hashToIndex(id, opts.length)
+    // Weighted (e.g. 70% A, 30% B): use opts[weightedHashToIndex(id, 0.7)]
     return opts[hashToIndex(id, opts.length)].value;
   },
 });
