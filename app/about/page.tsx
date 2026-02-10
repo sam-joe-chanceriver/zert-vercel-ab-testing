@@ -1,46 +1,14 @@
 import Link from "next/link";
+import { CtaSection } from "../components/sections/CtaSection";
+import { FlagController } from "../components/FlagController";
+import { HeroSection } from "../components/sections/HeroSection";
 import { Nav } from "../components/Nav";
 import { SectionActionButton } from "../components/SectionActionButton";
-import { aboutPageVariant, heroVariant, ctaVariant } from "@/flags";
-
-function AboutHeroSection({ variant }: { variant: "a" | "b" }) {
-  if (variant === "a") {
-    return (
-      <section className="flex flex-col items-center gap-6 py-16 text-center sm:items-start sm:text-left">
-        <h1 className="max-w-xl text-4xl font-bold leading-tight tracking-tight text-zinc-950 dark:text-zinc-50">
-          About us
-        </h1>
-        <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-          This is the about page. Learn more about our project and how we use
-          A/B testing with built-in variants.
-        </p>
-        <SectionActionButton
-          page="about"
-          section="hero"
-          variant="a"
-          label="Learn more"
-        />
-      </section>
-    );
-  }
-  return (
-    <section className="flex flex-col items-center gap-6 py-16 text-center sm:items-start sm:text-left">
-      <h1 className="max-w-xl text-4xl font-bold leading-tight tracking-tight text-zinc-950 dark:text-zinc-50">
-        Who we are
-      </h1>
-      <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-        Discover how we run experiments with page-wise and section-wise variants
-        with stable per-visitor variants.
-      </p>
-      <SectionActionButton
-        page="about"
-        section="hero"
-        variant="b"
-        label="Discover"
-      />
-    </section>
-  );
-}
+import {
+  ABOUT_CTA_CONTENT,
+  ABOUT_HERO_CONTENT,
+} from "@/lib/feature-flag-config";
+import { getFlagsForAboutPage } from "@/flags";
 
 function MissionSection() {
   return (
@@ -95,52 +63,11 @@ function ValuesSection() {
   );
 }
 
-function AboutCtaSection({ variant }: { variant: "a" | "b" }) {
-  if (variant === "a") {
-    return (
-      <section className="flex flex-col gap-4 border-t border-zinc-200 py-16 dark:border-zinc-800">
-        <Link
-          className="flex h-12 w-full max-w-[180px] items-center justify-center rounded-full bg-foreground px-5 text-background transition-colors hover:opacity-90"
-          href="/"
-        >
-          Back to home
-        </Link>
-        <SectionActionButton
-          page="about"
-          section="cta"
-          variant="a"
-          label="Track CTA"
-        />
-      </section>
-    );
-  }
-  return (
-    <section className="flex flex-col gap-4 border-t border-zinc-200 py-16 dark:border-zinc-800">
-      <Link
-        className="flex h-12 w-full max-w-[180px] items-center justify-center rounded-full border-2 border-zinc-900 px-5 transition-colors hover:bg-zinc-100 dark:border-white dark:hover:bg-zinc-800"
-        href="/"
-      >
-        Go to home
-      </Link>
-      <SectionActionButton
-        page="about"
-        section="cta"
-        variant="b"
-        label="Track CTA"
-      />
-    </section>
-  );
-}
-
 export default async function AboutPage() {
-  const [aboutVariant, hero, cta] = await Promise.all([
-    aboutPageVariant(),
-    heroVariant(),
-    ctaVariant(),
-  ]);
+  const { pageVariant, section } = await getFlagsForAboutPage();
 
   const tagline =
-    aboutVariant === "control"
+    pageVariant === "control"
       ? "You're viewing the control variant of the about page."
       : "You're viewing the variant experience of the about page.";
 
@@ -153,15 +80,30 @@ export default async function AboutPage() {
           <SectionActionButton
             page="about"
             section="page_intro"
-            variant={aboutVariant}
+            variant={pageVariant}
             label="Track page"
           />
         </div>
-        <AboutHeroSection variant={hero} />
+        <HeroSection
+          variant={section.hero}
+          content={ABOUT_HERO_CONTENT[section.hero]}
+          page="about"
+        />
         <MissionSection />
         <ValuesSection />
-        <AboutCtaSection variant={cta} />
+        <CtaSection
+          variant={section.cta}
+          content={ABOUT_CTA_CONTENT[section.cta]}
+          page="about"
+        />
       </main>
+      <FlagController
+        flags={{
+          "Page variant": pageVariant,
+          Hero: section.hero,
+          CTA: section.cta,
+        }}
+      />
     </div>
   );
 }

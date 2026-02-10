@@ -1,73 +1,10 @@
-import Image from "next/image";
-import Link from "next/link";
+import { CtaSection } from "./components/sections/CtaSection";
+import { FlagController } from "./components/FlagController";
+import { HeroSection } from "./components/sections/HeroSection";
 import { Nav } from "./components/Nav";
 import { SectionActionButton } from "./components/SectionActionButton";
-import { homePageVariant, heroVariant, ctaVariant } from "@/flags";
-
-function HeroSection({ variant }: { variant: "a" | "b" }) {
-  if (variant === "a") {
-    return (
-      <section className="flex flex-col items-center gap-6 py-16 text-center sm:items-start sm:text-left">
-        <h1 className="max-w-xl text-4xl font-bold leading-tight tracking-tight text-zinc-950 dark:text-zinc-50">
-          To get started, edit the page.tsx file.
-        </h1>
-        <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-          Looking for a starting point or more instructions? Head over to{" "}
-          <Link
-            href="https://vercel.com/templates?framework=next.js"
-            className="font-medium text-zinc-950 dark:text-zinc-50 underline underline-offset-4"
-          >
-            Templates
-          </Link>{" "}
-          or the{" "}
-          <Link
-            href="https://nextjs.org/learn"
-            className="font-medium text-zinc-950 dark:text-zinc-50 underline underline-offset-4"
-          >
-            Learning
-          </Link>{" "}
-          center.
-        </p>
-        <SectionActionButton
-          page="home"
-          section="hero"
-          variant="a"
-          label="Get started"
-        />
-      </section>
-    );
-  }
-  return (
-    <section className="flex flex-col items-center gap-6 py-16 text-center sm:items-start sm:text-left">
-      <h1 className="max-w-xl text-4xl font-bold leading-tight tracking-tight text-zinc-950 dark:text-zinc-50">
-        Build something great with Next.js
-      </h1>
-      <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-        Get started by exploring{" "}
-        <Link
-          href="https://vercel.com/templates?framework=next.js"
-          className="font-medium text-zinc-950 dark:text-zinc-50 underline underline-offset-4"
-        >
-          Vercel templates
-        </Link>{" "}
-        or dive into the{" "}
-        <Link
-          href="https://nextjs.org/learn"
-          className="font-medium text-zinc-950 dark:text-zinc-50 underline underline-offset-4"
-        >
-          Next.js docs
-        </Link>
-        .
-      </p>
-      <SectionActionButton
-        page="home"
-        section="hero"
-        variant="b"
-        label="Explore"
-      />
-    </section>
-  );
-}
+import { CTA_CONTENT, HERO_CONTENT } from "@/lib/feature-flag-config";
+import { getFlagsForHomePage } from "@/flags";
 
 function FeaturesSection() {
   const features = [
@@ -159,84 +96,13 @@ function TestimonialsSection() {
   );
 }
 
-function CtaSection({ variant }: { variant: "a" | "b" }) {
-  if (variant === "a") {
-    return (
-      <section className="flex flex-col gap-4 border-t border-zinc-200 py-16 text-base font-medium sm:flex-row dark:border-zinc-800">
-        <a
-          className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:opacity-90 md:w-[180px]"
-          href="https://vercel.com/new"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            className="dark:invert"
-            src="/vercel.svg"
-            alt="Vercel"
-            width={16}
-            height={16}
-          />
-          Deploy Now
-        </a>
-        <a
-          className="flex h-12 w-full items-center justify-center rounded-full border border-zinc-300 px-5 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800 md:w-[180px]"
-          href="https://nextjs.org/docs"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Documentation
-        </a>
-        <SectionActionButton
-          page="home"
-          section="cta"
-          variant="a"
-          label="Track CTA"
-        />
-      </section>
-    );
-  }
-  return (
-    <section className="flex flex-col gap-4 border-t border-zinc-200 py-16 text-base font-medium sm:flex-row dark:border-zinc-800">
-      <Link
-        className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-zinc-900 px-5 text-white transition-colors hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200 md:w-[180px]"
-        href="https://vercel.com/new"
-      >
-        <Image
-          className="dark:invert"
-          src="/vercel.svg"
-          alt="Vercel"
-          width={16}
-          height={16}
-        />
-        Deploy Now
-      </Link>
-      <Link
-        className="flex h-12 w-full items-center justify-center rounded-full border-2 border-zinc-900 px-5 transition-colors hover:bg-zinc-100 dark:border-white dark:hover:bg-zinc-800 md:w-[180px]"
-        href="https://nextjs.org/docs"
-      >
-        Documentation
-      </Link>
-      <SectionActionButton
-        page="home"
-        section="cta"
-        variant="b"
-        label="Track CTA"
-      />
-    </section>
-  );
-}
-
 export default async function HomePage() {
-  const [homeVariant, hero, cta] = await Promise.all([
-    homePageVariant(),
-    heroVariant(),
-    ctaVariant(),
-  ]);
+  const { homeVariant } = await getFlagsForHomePage();
 
   const intro =
-    homeVariant === "control"
-      ? "Welcome — you're on the home page."
-      : "You're viewing the variant experience.";
+    homeVariant === "a"
+      ? "You're viewing the homepage — Variant A."
+      : "You're viewing the homepage — Variant B.";
 
   return (
     <div className="min-h-screen bg-zinc-50 font-sans dark:bg-black">
@@ -251,11 +117,24 @@ export default async function HomePage() {
             label="Track page"
           />
         </div>
-        <HeroSection variant={hero} />
+        <HeroSection
+          variant={homeVariant}
+          content={HERO_CONTENT[homeVariant]}
+          page="home"
+        />
         <FeaturesSection />
         <TestimonialsSection />
-        <CtaSection variant={cta} />
+        <CtaSection
+          variant={homeVariant}
+          content={CTA_CONTENT[homeVariant]}
+          page="home"
+        />
       </main>
+      <FlagController
+        flags={{
+          Home: homeVariant,
+        }}
+      />
     </div>
   );
 }
