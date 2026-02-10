@@ -1,18 +1,6 @@
 import { createFlagsDiscoveryEndpoint, getProviderData } from "flags/next";
-import {
-  homePageVariant,
-  aboutPageVariant,
-  heroVariant,
-  ctaVariant,
-} from "@/flags";
+import * as flags from "../../../../flags";
 
-const flags = {
-  homePageVariant,
-  aboutPageVariant,
-  heroVariant,
-  ctaVariant,
-};
-
-export const GET = createFlagsDiscoveryEndpoint(async () =>
+export const GET = createFlagsDiscoveryEndpoint(() =>
   getProviderData(flags)
 );

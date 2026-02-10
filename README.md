@@ -1,5 +1,9 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## A/B testing
+
+Variants are chosen server-side in `flags.ts` using a hash of the visitor ID (from the `ab-visitor-id` cookie set in middleware). Each visitor gets a stable assignment: home/about page (control vs variant) and hero/CTA sections (a vs b). No external service or env vars required.
+
 ## Getting Started
 
 First, run the development server:
